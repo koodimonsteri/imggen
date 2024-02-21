@@ -27,7 +27,11 @@ def valid_generate_prompt(prompt):
 
 
 class CatGenClient(discord.Client):
-
+    """
+    Works fine when generating one image at a time.
+    Image generation sometimes fails if piping multiple prompts too quickly.
+    Should probably decouple image generation from discord bot.
+    """
     def __init__(self):
         self.catgenerator = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16")
         self.catgenerator.to("cuda")
@@ -78,6 +82,7 @@ class CatGenClient(discord.Client):
             image.save(image_binary, 'PNG')
             image_binary.seek(0)
             filename = prompt_to_filename(prompt)
+            logger.info('Upload image to discord.')
             await message.channel.send(f"{prompt}", file=discord.File(fp=image_binary, filename=filename))
 
 
